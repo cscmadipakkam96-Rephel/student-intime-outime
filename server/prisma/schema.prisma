@@ -1,0 +1,44 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+model User {
+  id               Int    @id @default(autoincrement())
+  name             String
+  enrollmentNumber String @unique
+  username         String @unique
+  password         String
+}
+
+model Register {
+  id            Int       @id @default(autoincrement())
+  comn_enrol_no String    @unique
+  name          String
+  gmail         String    @unique
+  // Nullable on purpose: existing rows migrated from the old password-based
+  // model have no DOB yet and must be re-published by the admin app before
+  // they can log in again.
+  date_of_birth DateTime?
+}
+
+// No relation/foreign key to Register on purpose: attendance history must
+// survive even if the Register row (login credentials) is deleted and later
+// re-created for the same comn_enrol_no.
+model Attendance {
+  id            Int       @id @default(autoincrement())
+  comn_enrol_no String
+  date          DateTime  @default(now())
+  inTime        DateTime?
+  outTime       DateTime?
+
+  @@index([comn_enrol_no])
+}

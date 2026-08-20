@@ -1,0 +1,10 @@
+# Server (Node/Express)
+server/node_modules/
+server/.env
+server/generated/
+
+# AI tool configs (not part of the app)
+.claude/
+.agents/
+.windsurf/
+skills-lock.json
