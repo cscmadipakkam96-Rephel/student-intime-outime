@@ -23,7 +23,6 @@ model Register {
   id            Int       @id @default(autoincrement())
   comn_enrol_no String    @unique
   name          String
-  gmail         String    @unique
   // Nullable on purpose: existing rows migrated from the old password-based
   // model have no DOB yet and must be re-published by the admin app before
   // they can log in again.
@@ -40,5 +39,22 @@ model Attendance {
   inTime        DateTime?
   outTime       DateTime?
 
+  @@index([comn_enrol_no])
+}
+
+// One row per successfully-verified Razorpay payment. This — not any
+// client-side flag — is the single source of truth for whether a student
+// has unlocked a given course video; it must survive refresh/logout/
+// reinstall.
+model CourseVideoPurchase {
+  id                  Int      @id @default(autoincrement())
+  comn_enrol_no       String
+  video_key           String
+  razorpay_order_id   String
+  razorpay_payment_id String   @unique
+  amount              String
+  createdAt           DateTime @default(now())
+
+  @@unique([comn_enrol_no, video_key])
   @@index([comn_enrol_no])
 }

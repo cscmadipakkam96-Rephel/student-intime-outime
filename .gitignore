@@ -3,6 +3,9 @@ server/node_modules/
 server/.env
 server/generated/
 
+# Database backups — contain real student PII, never commit
+backups/
+
 # AI tool configs (not part of the app)
 .claude/
 .agents/

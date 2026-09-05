@@ -12,7 +12,6 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> {
-  static const int totalDays = 15;
   static const List<String> _weekdays = [
     'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'
   ];
@@ -76,11 +75,14 @@ class _DashboardPageState extends State<DashboardPage> {
 
         setState(() {
           _records = records;
+          // Backend sends UTC timestamps (Postgres); convert to the
+          // device's local time before displaying, or times will be off
+          // by the local UTC offset (e.g. shown ~5:30 behind in IST).
           _todayInTime = todayRecord != null && todayRecord['inTime'] != null
-              ? DateTime.parse(todayRecord['inTime'] as String)
+              ? DateTime.parse(todayRecord['inTime'] as String).toLocal()
               : null;
           _todayOutTime = todayRecord != null && todayRecord['outTime'] != null
-              ? DateTime.parse(todayRecord['outTime'] as String)
+              ? DateTime.parse(todayRecord['outTime'] as String).toLocal()
               : null;
         });
       } else {
@@ -151,9 +153,6 @@ class _DashboardPageState extends State<DashboardPage> {
 
   @override
   Widget build(BuildContext context) {
-    final checkedInDays = _records.length;
-    final remaining = (totalDays - checkedInDays).clamp(0, totalDays);
-
     return Scaffold(
       body: SafeArea(
         child: RefreshIndicator(
@@ -170,7 +169,7 @@ class _DashboardPageState extends State<DashboardPage> {
                 ),
                 const SizedBox(height: 4),
                 const Text(
-                  'Ready for today at CSE Madipakkam?',
+                  'Ready for today at CSC?',
                   style: TextStyle(fontSize: 14, color: Colors.grey),
                 ),
                 const SizedBox(height: 20),
@@ -218,80 +217,6 @@ class _DashboardPageState extends State<DashboardPage> {
                       ),
                     ],
                   ),
-                ),
-                const SizedBox(height: 16),
-
-                // Stat cards
-                Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFFCF0B8),
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Icon(Icons.local_fire_department, color: Colors.orange),
-                            const SizedBox(height: 8),
-                            const Text('Checked-in', style: TextStyle(fontSize: 13)),
-                            const SizedBox(height: 4),
-                            Text(
-                              '$checkedInDays',
-                              style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
-                            ),
-                            Text('of $totalDays days', style: TextStyle(fontSize: 12, color: Colors.grey[700])),
-                            const SizedBox(height: 8),
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(4),
-                              child: LinearProgressIndicator(
-                                value: (checkedInDays / totalDays).clamp(0.0, 1.0),
-                                backgroundColor: Colors.white,
-                                color: Colors.orange,
-                                minHeight: 6,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF3D2A5C),
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Icon(Icons.bolt, color: Colors.amber),
-                            const SizedBox(height: 8),
-                            const Text('Remaining', style: TextStyle(fontSize: 13, color: Colors.white)),
-                            const SizedBox(height: 4),
-                            Text(
-                              '$remaining',
-                              style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.white),
-                            ),
-                            const Text('days left', style: TextStyle(fontSize: 12, color: Colors.white70)),
-                            const SizedBox(height: 8),
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(4),
-                              child: LinearProgressIndicator(
-                                value: (remaining / totalDays).clamp(0.0, 1.0),
-                                backgroundColor: Colors.white24,
-                                color: Colors.amber,
-                                minHeight: 6,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
                 ),
                 const SizedBox(height: 20),
 
@@ -366,9 +291,13 @@ class _DashboardPageState extends State<DashboardPage> {
                   )
                 else
                   ..._records.map((record) {
-                    final date = DateTime.parse(record['date'] as String);
-                    final inTime = record['inTime'] != null ? DateTime.parse(record['inTime'] as String) : null;
-                    final outTime = record['outTime'] != null ? DateTime.parse(record['outTime'] as String) : null;
+                    final date = DateTime.parse(record['date'] as String).toLocal();
+                    final inTime = record['inTime'] != null
+                        ? DateTime.parse(record['inTime'] as String).toLocal()
+                        : null;
+                    final outTime = record['outTime'] != null
+                        ? DateTime.parse(record['outTime'] as String).toLocal()
+                        : null;
                     return _historyCard(date: date, inTime: inTime, outTime: outTime);
                   }),
               ],

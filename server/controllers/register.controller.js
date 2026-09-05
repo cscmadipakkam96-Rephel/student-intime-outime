@@ -2,12 +2,12 @@ const prisma = require('../config/prisma');
 
 async function registerStudent(req, res) {
   try {
-    const { comn_enrol_no, name, gmail, date_of_birth } = req.body;
+    const { comn_enrol_no, name, date_of_birth } = req.body;
 
-    if (!comn_enrol_no || !name || !gmail || !date_of_birth) {
+    if (!comn_enrol_no || !name || !date_of_birth) {
       return res.status(400).json({
         success: false,
-        error: 'comn_enrol_no, name, gmail, and date_of_birth are all required',
+        error: 'comn_enrol_no, name, and date_of_birth are all required',
       });
     }
 
@@ -21,8 +21,8 @@ async function registerStudent(req, res) {
 
     await prisma.register.upsert({
       where: { comn_enrol_no },
-      update: { name, gmail, date_of_birth: dob },
-      create: { comn_enrol_no, name, gmail, date_of_birth: dob },
+      update: { name, date_of_birth: dob },
+      create: { comn_enrol_no, name, date_of_birth: dob },
     });
 
     res.status(200).json({ success: true });

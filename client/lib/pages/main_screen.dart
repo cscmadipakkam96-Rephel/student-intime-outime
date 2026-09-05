@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'dashboard_page.dart';
 import 'profile_page.dart';
+import 'recordings_page.dart';
+import 'course_videos_page.dart';
 
 class MainScreen extends StatefulWidget {
   final String studentName;
-  final String gmail;
   final String comnEnrolNo;
 
   const MainScreen({
     super.key,
     required this.studentName,
-    required this.gmail,
     required this.comnEnrolNo,
   });
 
@@ -25,9 +25,10 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     final pages = [
       DashboardPage(studentName: widget.studentName),
+      const RecordingsPage(),
+      const CourseVideosPage(),
       ProfilePage(
         studentName: widget.studentName,
-        gmail: widget.gmail,
         comnEnrolNo: widget.comnEnrolNo,
       ),
     ];
@@ -35,6 +36,7 @@ class _MainScreenState extends State<MainScreen> {
     return Scaffold(
       body: IndexedStack(index: _selectedIndex, children: pages),
       bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
         currentIndex: _selectedIndex,
         selectedItemColor: const Color(0xFF2D1B4E),
         unselectedItemColor: Colors.grey,
@@ -44,6 +46,16 @@ class _MainScreenState extends State<MainScreen> {
             icon: Icon(Icons.home_outlined),
             activeIcon: Icon(Icons.home),
             label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.video_library_outlined),
+            activeIcon: Icon(Icons.video_library),
+            label: 'Recordings',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.school_outlined),
+            activeIcon: Icon(Icons.school),
+            label: 'Courses',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person_outline),

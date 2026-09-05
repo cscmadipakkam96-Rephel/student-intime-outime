@@ -22,11 +22,10 @@ async function main() {
   for (const r of registers) {
     await rds.register.upsert({
       where: { comn_enrol_no: r.comn_enrol_no },
-      update: { name: r.name, gmail: r.gmail, date_of_birth: r.date_of_birth },
+      update: { name: r.name, date_of_birth: r.date_of_birth },
       create: {
         comn_enrol_no: r.comn_enrol_no,
         name: r.name,
-        gmail: r.gmail,
         date_of_birth: r.date_of_birth,
       },
     });

@@ -4,13 +4,11 @@ import '../services/api_service.dart';
 
 class ProfilePage extends StatelessWidget {
   final String studentName;
-  final String gmail;
   final String comnEnrolNo;
 
   const ProfilePage({
     super.key,
     required this.studentName,
-    required this.gmail,
     required this.comnEnrolNo,
   });
 
@@ -56,7 +54,6 @@ class ProfilePage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 32),
-              _infoTile(icon: Icons.mail_outline, label: 'Gmail', value: gmail),
               _infoTile(
                 icon: Icons.badge_outlined,
                 label: 'Enrollment Number',

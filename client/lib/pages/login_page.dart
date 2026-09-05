@@ -51,7 +51,6 @@ class _LoginPageState extends State<LoginPage> {
           MaterialPageRoute(
             builder: (context) => MainScreen(
               studentName: user['name'] as String,
-              gmail: user['gmail'] as String,
               comnEnrolNo: user['comn_enrol_no'] as String,
             ),
           ),

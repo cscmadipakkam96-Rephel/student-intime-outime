@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 const prisma = require('../config/prisma');
 
-const COOKIE_MAX_AGE = 24 * 60 * 60 * 1000;
+const COOKIE_MAX_AGE = 30 * 24 * 60 * 60 * 1000;
 
 function formatDDMMYYYY(date) {
   const day = String(date.getUTCDate()).padStart(2, '0');
@@ -44,9 +44,9 @@ async function login(req, res) {
     }
 
     const token = jwt.sign(
-      { id: student.id, comn_enrol_no: student.comn_enrol_no, name: student.name, gmail: student.gmail },
+      { id: student.id, comn_enrol_no: student.comn_enrol_no, name: student.name },
       process.env.JWT_SECRET,
-      { expiresIn: '1d' }
+      { expiresIn: '30d' }
     );
 
     res.cookie('token', token, {
@@ -61,7 +61,6 @@ async function login(req, res) {
       user: {
         comn_enrol_no: student.comn_enrol_no,
         name: student.name,
-        gmail: student.gmail,
       },
     });
   } catch (err) {
