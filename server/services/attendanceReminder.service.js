@@ -53,10 +53,13 @@ async function sendDailyAttendanceReminders() {
     }
 
     try {
+      // Data-only (no "notification" key) so the app always builds the
+      // notification itself — lets it use BigTextStyle so the full message
+      // is readable by expanding it in the shade, without opening the app.
       await messaging.send({
         token: student.fcmToken,
-        notification: { title, body },
-        android: { priority: 'high', notification: { channelId: 'attendance_reminders' } },
+        data: { title, body },
+        android: { priority: 'high' },
       });
       sent++;
     } catch (err) {
