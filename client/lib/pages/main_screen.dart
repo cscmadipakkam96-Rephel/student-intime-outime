@@ -3,6 +3,7 @@ import 'dashboard_page.dart';
 import 'profile_page.dart';
 import 'recordings_page.dart';
 import 'course_videos_page.dart';
+import '../services/notification_service.dart';
 
 class MainScreen extends StatefulWidget {
   final String studentName;
@@ -20,6 +21,12 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    NotificationService.requestPermissionAndRegister();
+  }
 
   @override
   Widget build(BuildContext context) {

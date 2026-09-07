@@ -27,6 +27,9 @@ model Register {
   // model have no DOB yet and must be re-published by the admin app before
   // they can log in again.
   date_of_birth DateTime?
+  // Latest FCM device token for this student, overwritten on every login/app
+  // open — only one active device is tracked per student at a time.
+  fcmToken      String?
 }
 
 // No relation/foreign key to Register on purpose: attendance history must

@@ -127,6 +127,16 @@ class ApiService {
     return {'statusCode': response.statusCode, ...data};
   }
 
+  static Future<Map<String, dynamic>> registerFcmToken(String token) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/notifications/register-token'),
+      headers: await _headers(json: true),
+      body: jsonEncode({'token': token}),
+    );
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    return {'statusCode': response.statusCode, ...data};
+  }
+
   // No auth header needed — checked before a session can even exist.
   static Future<Map<String, dynamic>> getMinAppVersion() async {
     final response = await http.get(Uri.parse('$baseUrl/api/app-version'));

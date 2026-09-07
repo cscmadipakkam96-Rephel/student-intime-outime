@@ -3,6 +3,9 @@ server/node_modules/
 server/.env
 server/generated/
 
+# Firebase service account key — secret credential, never commit
+server/firebase-service-account.json
+
 # Database backups — contain real student PII, never commit
 backups/
 

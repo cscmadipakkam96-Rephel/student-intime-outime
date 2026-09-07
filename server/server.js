@@ -11,6 +11,8 @@ const videosRoutes = require('./routes/videos.routes');
 const attendanceSummaryRoutes = require('./routes/attendanceSummary.routes');
 const courseVideosRoutes = require('./routes/courseVideos.routes');
 const appVersionRoutes = require('./routes/appVersion.routes');
+const notificationRoutes = require('./routes/notification.routes');
+const { startAttendanceReminderJob } = require('./jobs/attendanceReminder.job');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -30,6 +32,7 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/attendance', attendanceRoutes);
 app.use('/api/videos', videosRoutes);
 app.use('/api/course-videos', courseVideosRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 app.use(cors());
 
@@ -45,4 +48,5 @@ app.listen(PORT, async () => {
   } catch (err) {
     console.error('Database connection failed:', err);
   }
+  startAttendanceReminderJob();
 });

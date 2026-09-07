@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "272015272007",
+    "project_id": "csc-student-app",
+    "storage_bucket": "csc-student-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:272015272007:android:cdbe4d66d3c47924046962",
+        "android_client_info": {
+          "package_name": "com.cscitedu.stud"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDdRGzvtlgrAYSGKs_er5Lw7WlCcVj2pPg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
