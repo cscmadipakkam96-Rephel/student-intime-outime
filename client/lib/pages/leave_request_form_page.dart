@@ -88,9 +88,13 @@ class _LeaveRequestFormPageState extends State<LeaveRequestFormPage> {
       if ((result['statusCode'] == 200 || result['statusCode'] == 201) && result['success'] == true) {
         Navigator.of(context).pop(true);
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(result['error']?.toString() ?? 'Could not submit leave request')),
-        );
+        // Course Admission returns human-readable text in "message" (e.g. the
+        // 409 duplicate-request case); our own backend's validation errors
+        // use "error" — check both.
+        final text = result['message']?.toString()
+            ?? result['error']?.toString()
+            ?? 'Could not submit leave request';
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
       }
     } catch (e) {
       if (mounted) {

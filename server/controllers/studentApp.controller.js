@@ -11,23 +11,18 @@ async function getBatches(req, res) {
   }
 }
 
-// Enriches the raw attendance rows with two things the upstream API doesn't
-// provide directly, so the app never has to do this correlation itself:
-// - batch_id (attendance only gives batch_name, but submitting a leave
-//   request needs the id) — resolved via a name lookup against /batches.
-//   Best-effort: if two batches share a name this could resolve to the
-//   wrong one, but that's a data issue on the upstream side, not ours.
-// - hasLeaveRequest (whether an Absent row already has a leave letter
-//   submitted for that exact batch + date) — resolved against /leave-requests
-//   so the app knows whether to show "Submit Leave Letter".
+// Enriches each attendance row with hasLeaveRequest — whether it already has
+// a non-rejected leave letter submitted for that exact batch + date — so the
+// app knows whether to show "Submit Leave Letter" without an extra round
+// trip. A rejected request doesn't count, matching the backend's own rule
+// that a rejected request doesn't block resubmission.
 async function getAttendance(req, res) {
   try {
     const { comn_enrol_no } = req.user;
     const qs = `comn_enrol_no=${encodeURIComponent(comn_enrol_no)}`;
 
-    const [attendanceResult, batchesResult, leaveRequestsResult] = await Promise.all([
+    const [attendanceResult, leaveRequestsResult] = await Promise.all([
       caFetch(`/attendance?${qs}`),
-      caFetch(`/batches?${qs}`),
       caFetch(`/leave-requests?${qs}`),
     ]);
 
@@ -35,25 +30,17 @@ async function getAttendance(req, res) {
       return res.status(attendanceResult.statusCode).json(attendanceResult.data);
     }
 
-    const batchNameToId = new Map();
-    if (batchesResult.data.success) {
-      for (const batch of batchesResult.data.data) {
-        if (!batchNameToId.has(batch.batch_name)) {
-          batchNameToId.set(batch.batch_name, batch.batch_id);
-        }
-      }
-    }
-
     const leaveRequestKeys = new Set();
     if (leaveRequestsResult.data.success) {
       for (const lr of leaveRequestsResult.data.data) {
-        leaveRequestKeys.add(`${lr.batch_name}|${lr.session_date}`);
+        if (lr.status !== 'rejected') {
+          leaveRequestKeys.add(`${lr.batch_name}|${lr.session_date}`);
+        }
       }
     }
 
     const enriched = attendanceResult.data.data.map((row) => ({
       ...row,
-      batch_id: batchNameToId.get(row.batch_name) ?? null,
       hasLeaveRequest: leaveRequestKeys.has(`${row.batch_name}|${row.date}`),
     }));
 
