@@ -127,6 +127,53 @@ class ApiService {
     return {'statusCode': response.statusCode, ...data};
   }
 
+  static Future<Map<String, dynamic>> getBatches() async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/api/student-app/batches'),
+      headers: await _headers(),
+    );
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    return {'statusCode': response.statusCode, ...data};
+  }
+
+  static Future<Map<String, dynamic>> getClassAttendance() async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/api/student-app/attendance'),
+      headers: await _headers(),
+    );
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    return {'statusCode': response.statusCode, ...data};
+  }
+
+  static Future<Map<String, dynamic>> submitLeaveRequest({
+    required int batchId,
+    required String sessionDate,
+    required String description,
+    required String leaveType,
+  }) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/student-app/leave-requests'),
+      headers: await _headers(json: true),
+      body: jsonEncode({
+        'batch_id': batchId,
+        'session_date': sessionDate,
+        'description': description,
+        'leave_type': leaveType,
+      }),
+    );
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    return {'statusCode': response.statusCode, ...data};
+  }
+
+  static Future<Map<String, dynamic>> getLeaveRequests() async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/api/student-app/leave-requests'),
+      headers: await _headers(),
+    );
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    return {'statusCode': response.statusCode, ...data};
+  }
+
   static Future<Map<String, dynamic>> registerFcmToken(String token) async {
     final response = await http.post(
       Uri.parse('$baseUrl/api/notifications/register-token'),

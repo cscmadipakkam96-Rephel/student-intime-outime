@@ -12,6 +12,7 @@ const attendanceSummaryRoutes = require('./routes/attendanceSummary.routes');
 const courseVideosRoutes = require('./routes/courseVideos.routes');
 const appVersionRoutes = require('./routes/appVersion.routes');
 const notificationRoutes = require('./routes/notification.routes');
+const studentAppRoutes = require('./routes/studentApp.routes');
 const { startAttendanceReminderJob } = require('./jobs/attendanceReminder.job');
 
 const app = express();
@@ -33,6 +34,7 @@ app.use('/api/attendance', attendanceRoutes);
 app.use('/api/videos', videosRoutes);
 app.use('/api/course-videos', courseVideosRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/student-app', studentAppRoutes);
 
 app.use(cors());
 
