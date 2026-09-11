@@ -12,6 +12,7 @@ const attendanceSummaryRoutes = require('./routes/attendanceSummary.routes');
 const courseVideosRoutes = require('./routes/courseVideos.routes');
 const appVersionRoutes = require('./routes/appVersion.routes');
 const notificationRoutes = require('./routes/notification.routes');
+const notificationWebhookRoutes = require('./routes/notificationWebhook.routes');
 const studentAppRoutes = require('./routes/studentApp.routes');
 const { startAttendanceReminderJob } = require('./jobs/attendanceReminder.job');
 
@@ -26,6 +27,10 @@ app.use(cookieParser());
 app.use('/api/register', registerRoutes);
 app.use('/api/v1/attendance-summary', attendanceSummaryRoutes);
 app.use('/api/app-version', appVersionRoutes);
+// Must be registered before the JWT-protected '/api/notifications' mount
+// below — this is a server-to-server webhook (API key, not a student
+// session) and needs to win the path match first.
+app.use('/api/notifications/incoming', notificationWebhookRoutes);
 
 // Auth/dashboard need credentialed CORS (cookies) — scoped per-route.
 app.use('/api/auth', authRoutes);
