@@ -14,7 +14,6 @@ const appVersionRoutes = require('./routes/appVersion.routes');
 const notificationRoutes = require('./routes/notification.routes');
 const notificationWebhookRoutes = require('./routes/notificationWebhook.routes');
 const studentAppRoutes = require('./routes/studentApp.routes');
-const { startAttendanceReminderJob } = require('./jobs/attendanceReminder.job');
 const { startScheduleReminderJob } = require('./jobs/scheduleReminder.job');
 
 const app = express();
@@ -56,6 +55,5 @@ app.listen(PORT, async () => {
   } catch (err) {
     console.error('Database connection failed:', err);
   }
-  startAttendanceReminderJob();
   startScheduleReminderJob();
 });

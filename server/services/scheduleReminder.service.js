@@ -23,9 +23,7 @@ function hhmmToMinutes(hhmm) {
   return h * 60 + m;
 }
 
-// Matches the day-boundary convention already used by attendanceReminder.service.js
-// for "today"'s Attendance rows — kept identical so both jobs agree on what
-// counts as the same day.
+// Local server-time day boundaries, used to scope "today"'s Attendance rows.
 function startOfToday() {
   const d = new Date();
   d.setHours(0, 0, 0, 0);
