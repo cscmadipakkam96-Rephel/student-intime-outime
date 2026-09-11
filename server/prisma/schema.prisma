@@ -61,3 +61,15 @@ model CourseVideoPurchase {
   @@unique([comn_enrol_no, video_key])
   @@index([comn_enrol_no])
 }
+
+// One row per reminder actually sent — prevents the schedule-reminder poll
+// (runs every 1-2 min) from re-firing the same "check in"/"check out" nudge
+// on every cycle once it's already gone out for that student, that day.
+model ReminderLog {
+  id            Int    @id @default(autoincrement())
+  comn_enrol_no String
+  date          String
+  type          String
+
+  @@unique([comn_enrol_no, date, type])
+}
