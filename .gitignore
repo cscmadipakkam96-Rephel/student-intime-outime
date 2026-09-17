@@ -14,3 +14,10 @@ backups/
 .agents/
 .windsurf/
 skills-lock.json
+
+# Client (Flutter) build output and JVM crash dumps from Gradle OOM kills
+client/build/
+client/android/build/
+client/android/app/build/
+hs_err_pid*.log
+replay_pid*.log

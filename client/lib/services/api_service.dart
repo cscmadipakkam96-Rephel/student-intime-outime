@@ -7,7 +7,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 // Cookie header on every later request. Stored in SharedPreferences so the
 // session survives an app restart too.
 class ApiService {
-  static const String baseUrl = 'https://13-62-125-222.sslip.io';
+  static const String baseUrl = 'https://app.cscitedu.com';
+
+  // Class recordings (live-class capture) haven't been migrated to the new
+  // PHP backend yet — deliberately left pointed at the old Node backend and
+  // its existing S3-backed storage until that piece is rebuilt.
+  static const String _recordingsBaseUrl = 'https://13-62-125-222.sslip.io';
+
   static const String _cookieKey = 'session_cookie';
 
   static Future<String?> _getCookie() async {
@@ -102,7 +108,7 @@ class ApiService {
 
   static Future<Map<String, dynamic>> getMyRecordings() async {
     final response = await http.get(
-      Uri.parse('$baseUrl/api/videos/recordings'),
+      Uri.parse('$_recordingsBaseUrl/api/videos/recordings'),
       headers: await _headers(),
     );
     final data = jsonDecode(response.body) as Map<String, dynamic>;
@@ -178,7 +184,37 @@ class ApiService {
     final response = await http.post(
       Uri.parse('$baseUrl/api/notifications/register-token'),
       headers: await _headers(json: true),
-      body: jsonEncode({'token': token}),
+      body: jsonEncode({'fcm_token': token}),
+    );
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    return {'statusCode': response.statusCode, ...data};
+  }
+
+  // New backend has no server-triggered push — the app polls this for
+  // undelivered notifications instead (see NotificationPollingService).
+  static Future<Map<String, dynamic>> getPendingNotifications() async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/api/student-app/notifications'),
+      headers: await _headers(),
+    );
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    return {'statusCode': response.statusCode, ...data};
+  }
+
+  static Future<Map<String, dynamic>> ackNotification(int id) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/student-app/notifications/ack?id=$id'),
+      headers: await _headers(),
+    );
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    return {'statusCode': response.statusCode, ...data};
+  }
+
+  static Future<Map<String, dynamic>> ackNotificationsBulk(List<int> ids) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/student-app/notifications/ack-bulk'),
+      headers: await _headers(json: true),
+      body: jsonEncode({'ids': ids}),
     );
     final data = jsonDecode(response.body) as Map<String, dynamic>;
     return {'statusCode': response.statusCode, ...data};

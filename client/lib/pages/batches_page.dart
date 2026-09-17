@@ -31,7 +31,7 @@ class _BatchesPageState extends State<BatchesPage> {
       if (result['statusCode'] == 200 && result['success'] == true) {
         setState(() => _batches = (result['data'] as List).cast<Map<String, dynamic>>());
       } else {
-        setState(() => _error = result['error']?.toString() ?? 'Failed to load batches');
+        setState(() => _error = result['message']?.toString() ?? result['error']?.toString() ?? 'Failed to load batches');
       }
     } catch (e) {
       setState(() => _error = 'Could not reach server: $e');

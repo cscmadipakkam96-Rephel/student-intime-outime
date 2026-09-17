@@ -35,10 +35,10 @@ class _CourseVideosPageState extends State<CourseVideosPage> {
       final result = await ApiService.getCourseVideos();
       if (result['statusCode'] == 200 && result['success'] == true) {
         setState(() {
-          _videos = (result['videos'] as List).cast<Map<String, dynamic>>();
+          _videos = (result['data'] as List).cast<Map<String, dynamic>>();
         });
       } else {
-        setState(() => _error = result['error']?.toString() ?? 'Failed to load course videos');
+        setState(() => _error = result['message']?.toString() ?? result['error']?.toString() ?? 'Failed to load course videos');
       }
     } catch (e) {
       setState(() => _error = 'Could not reach server: $e');
@@ -66,19 +66,36 @@ class _CourseVideosPageState extends State<CourseVideosPage> {
     }
   }
 
-  Future<void> _play(String id, String title) async {
+  Future<void> _play(Map<String, dynamic> video) async {
+    final id = video['id'].toString();
+    final title = video['title'] as String? ?? 'Untitled';
     final result = await ApiService.getCourseVideoPlayUrl(id);
+
     if (result['statusCode'] == 200 && result['success'] == true) {
-      final url = result['url'] as String;
+      final url = (result['data'] as Map<String, dynamic>)['playback_url'] as String;
       if (!mounted) return;
       Navigator.of(context).push(
         MaterialPageRoute(builder: (context) => VideoPlayerPage(url: url, title: title)),
       );
-    } else if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(result['error']?.toString() ?? 'Could not load video')),
-      );
+      return;
     }
+
+    if (!mounted) return;
+
+    // Race: list call said purchased, but the server disagrees by the time
+    // we ask to play — fall back to the same manual WhatsApp enroll flow
+    // rather than leaving the student stuck on an error.
+    if (result['statusCode'] == 403) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('This video isn\'t unlocked yet — opening WhatsApp to enroll.')),
+      );
+      await _enrollViaWhatsApp(video);
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(result['message']?.toString() ?? result['error']?.toString() ?? 'Could not load video')),
+    );
   }
 
   String _formatPrice(dynamic price) {
@@ -144,9 +161,10 @@ class _CourseVideosPageState extends State<CourseVideosPage> {
       itemCount: _videos.length,
       itemBuilder: (context, index) {
         final video = _videos[index];
-        final id = video['id'] as String;
+        // Defensively stringified — the new backend's id may come through as
+        // a JSON number (DB row id) rather than the old opaque string key.
         final title = video['title'] as String? ?? 'Untitled';
-        final durationMinutes = video['durationMinutes'];
+        final durationMinutes = video['duration_minutes'];
         final unlocked = video['purchased'] == true;
 
         return Container(
@@ -189,7 +207,7 @@ class _CourseVideosPageState extends State<CourseVideosPage> {
               const SizedBox(width: 8),
               unlocked
                   ? ElevatedButton.icon(
-                      onPressed: () => _play(id, title),
+                      onPressed: () => _play(video),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF2D1B4E),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),

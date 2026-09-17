@@ -4,6 +4,7 @@ import 'profile_page.dart';
 import 'recordings_page.dart';
 import 'course_videos_page.dart';
 import '../services/notification_service.dart';
+import '../services/notification_polling_service.dart';
 
 class MainScreen extends StatefulWidget {
   final String studentName;
@@ -19,13 +20,33 @@ class MainScreen extends StatefulWidget {
   State<MainScreen> createState() => _MainScreenState();
 }
 
-class _MainScreenState extends State<MainScreen> {
+class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
   int _selectedIndex = 0;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     NotificationService.requestPermissionAndRegister();
+    // Poll now (covers app launch) and keep polling every 2 min while this
+    // screen — i.e. a logged-in session — stays foregrounded.
+    NotificationPollingService.start();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    NotificationPollingService.stop();
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      NotificationPollingService.start();
+    } else if (state == AppLifecycleState.paused || state == AppLifecycleState.detached) {
+      NotificationPollingService.stop();
+    }
   }
 
   @override

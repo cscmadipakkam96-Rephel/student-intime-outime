@@ -62,7 +62,7 @@ class _DashboardPageState extends State<DashboardPage> {
       final result = await ApiService.getHistory();
 
       if (result['statusCode'] == 200 && result['success'] == true) {
-        final records = (result['records'] as List).cast<Map<String, dynamic>>();
+        final records = (result['data'] as List).cast<Map<String, dynamic>>();
 
         Map<String, dynamic>? todayRecord;
         for (final record in records) {
@@ -75,18 +75,18 @@ class _DashboardPageState extends State<DashboardPage> {
 
         setState(() {
           _records = records;
-          // Backend sends UTC timestamps (Postgres); convert to the
-          // device's local time before displaying, or times will be off
-          // by the local UTC offset (e.g. shown ~5:30 behind in IST).
-          _todayInTime = todayRecord != null && todayRecord['inTime'] != null
-              ? DateTime.parse(todayRecord['inTime'] as String).toLocal()
+          // Backend sends UTC timestamps; convert to the device's local
+          // time before displaying, or times will be off by the local UTC
+          // offset (e.g. shown ~5:30 behind in IST).
+          _todayInTime = todayRecord != null && todayRecord['in_time'] != null
+              ? DateTime.parse(todayRecord['in_time'] as String).toLocal()
               : null;
-          _todayOutTime = todayRecord != null && todayRecord['outTime'] != null
-              ? DateTime.parse(todayRecord['outTime'] as String).toLocal()
+          _todayOutTime = todayRecord != null && todayRecord['out_time'] != null
+              ? DateTime.parse(todayRecord['out_time'] as String).toLocal()
               : null;
         });
       } else {
-        setState(() => _loadError = result['error']?.toString() ?? 'Failed to load history');
+        setState(() => _loadError = result['message']?.toString() ?? result['error']?.toString() ?? 'Failed to load history');
       }
     } catch (e) {
       setState(() => _loadError = 'Could not reach server: $e');
@@ -99,11 +99,11 @@ class _DashboardPageState extends State<DashboardPage> {
     setState(() => _actionLoading = true);
     try {
       final result = await ApiService.markInTime();
-      if (result['statusCode'] == 200 && result['success'] == true) {
+      if ((result['statusCode'] == 200 || result['statusCode'] == 201) && result['success'] == true) {
         await _loadHistory();
       } else if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(result['error']?.toString() ?? 'Could not mark in-time')),
+          SnackBar(content: Text(result['message']?.toString() ?? result['error']?.toString() ?? 'Could not mark in-time')),
         );
       }
     } catch (e) {
@@ -125,7 +125,7 @@ class _DashboardPageState extends State<DashboardPage> {
         await _loadHistory();
       } else if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(result['error']?.toString() ?? 'Could not mark out-time')),
+          SnackBar(content: Text(result['message']?.toString() ?? result['error']?.toString() ?? 'Could not mark out-time')),
         );
       }
     } catch (e) {
@@ -292,11 +292,11 @@ class _DashboardPageState extends State<DashboardPage> {
                 else
                   ..._records.map((record) {
                     final date = DateTime.parse(record['date'] as String).toLocal();
-                    final inTime = record['inTime'] != null
-                        ? DateTime.parse(record['inTime'] as String).toLocal()
+                    final inTime = record['in_time'] != null
+                        ? DateTime.parse(record['in_time'] as String).toLocal()
                         : null;
-                    final outTime = record['outTime'] != null
-                        ? DateTime.parse(record['outTime'] as String).toLocal()
+                    final outTime = record['out_time'] != null
+                        ? DateTime.parse(record['out_time'] as String).toLocal()
                         : null;
                     return _historyCard(date: date, inTime: inTime, outTime: outTime);
                   }),

@@ -28,16 +28,20 @@ NotificationDetails _expandedDetails(String body) => NotificationDetails(
       ),
     );
 
-Future<void> _showFromData(Map<String, dynamic> data) async {
-  final title = data['title'] as String?;
-  final body = data['body'] as String?;
-  if (title == null || body == null) return;
+Future<void> _showLocalNotification(String title, String body) async {
   await _localNotifications.show(
     id: DateTime.now().millisecondsSinceEpoch.remainder(100000),
     title: title,
     body: body,
     notificationDetails: _expandedDetails(body),
   );
+}
+
+Future<void> _showFromData(Map<String, dynamic> data) async {
+  final title = data['title'] as String?;
+  final body = data['body'] as String?;
+  if (title == null || body == null) return;
+  await _showLocalNotification(title, body);
 }
 
 // Runs in a separate background isolate when a message arrives while the app
@@ -92,7 +96,16 @@ class NotificationService {
 
     // Data-only messages don't auto-display anything on Android — we build
     // and show the notification ourselves so it always uses BigTextStyle.
+    // Currently dormant with the new backend (no server-triggered push), but
+    // left wired up so server-side push can be turned back on with zero
+    // app-side changes.
     FirebaseMessaging.onMessage.listen((message) => _showFromData(message.data));
+  }
+
+  // Shared with NotificationPollingService — same BigTextStyle display, just
+  // triggered by a poll result instead of an incoming FCM message.
+  static Future<void> showLocal({required String title, required String body}) {
+    return _showLocalNotification(title, body);
   }
 
   // Requests notification permission (required on Android 13+, iOS) and, if

@@ -32,7 +32,7 @@ class _LeaveRequestsPageState extends State<LeaveRequestsPage> {
         rows.sort((a, b) => (b['requested_at'] as String).compareTo(a['requested_at'] as String));
         setState(() => _requests = rows);
       } else {
-        setState(() => _error = result['error']?.toString() ?? 'Failed to load leave requests');
+        setState(() => _error = result['message']?.toString() ?? result['error']?.toString() ?? 'Failed to load leave requests');
       }
     } catch (e) {
       setState(() => _error = 'Could not reach server: $e');

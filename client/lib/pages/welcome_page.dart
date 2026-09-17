@@ -69,7 +69,8 @@ class _WelcomePageState extends State<WelcomePage> {
       final packageInfo = await PackageInfo.fromPlatform();
 
       if (versionResult['statusCode'] == 200 && versionResult['success'] == true) {
-        final minVersion = versionResult['minVersion'] as String;
+        final versionData = versionResult['data'] as Map<String, dynamic>;
+        final minVersion = versionData['minimum_version'] as String;
         if (_isOlderVersion(packageInfo.version, minVersion)) {
           if (!mounted) return;
           Navigator.pushReplacement(
