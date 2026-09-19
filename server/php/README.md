@@ -23,29 +23,33 @@ the whole `uploads/` tree.
 `server/uploads/recordings/<comn_enrol_no>/`, matching the old S3 prefix
 convention.
 
-## 2. Schedule Daily Reminder cron (`cron/scheduleReminders.php`, `models/ReminderLog.php`, `sql/029_reminder_log.sql`)
+## 2. Schedule Daily Reminder (`utils/scheduleReminderRunner.php`, `models/ReminderLog.php`, `sql/029_reminder_log.sql`, `cron/scheduleReminders.php`)
 
-Replaces the old Node `scheduleReminder.job.js` cron. Every 1-2 minutes,
-checks every active student whose class meets today (`class_days`), and
-fires a "check in"/"check out" reminder 5 minutes after their resolved
-class time if they haven't marked attendance yet — reusing
-`effectiveScheduleFor()` / `classDaysByAdmissionId()`, which already existed
-in `controllers/notificationController.php`. Writes a row to `notifications`
+Replaces the old Node `scheduleReminder.job.js` cron. For every active
+student whose class meets today (`class_days`), fires a "check in"/"check
+out" reminder 5 minutes after their resolved class time if they haven't
+marked attendance yet — reusing `effectiveScheduleFor()` /
+`classDaysByAdmissionId()`, which already existed in
+`controllers/notificationController.php`. Writes a row to `notifications`
 (picked up by the app's existing poll/ack flow) and to the new
 `reminder_log` table (dedup — at most one reminder per student per type per
 day).
 
-**Admin action needed:** in Hostinger hPanel → Cron Jobs, add a job that
-hits this URL every 1-2 minutes:
+**Trigger mechanism — no cron-job access on this host (FTP + phpMyAdmin
+only), so this piggybacks on ordinary app traffic instead of a real cron:**
+`config/bootstrap.php` calls `maybeRunScheduleReminderCheck()` on every
+request, which runs the actual check only once at least 2 minutes have
+passed since the last time any request triggered it (tracked via
+`uploads/.reminder_check_last_run`'s mtime). Confirmed working live —
+skips on rapid repeat requests, runs again once the interval has passed.
+Timing is therefore traffic-dependent (fires shortly after the next real
+request past the 5-minute mark) rather than a guaranteed interval, but
+needs zero hosting-panel access.
 
-```
-https://app.cscitedu.com/server/cron/scheduleReminders.php?key=<CRON_SECRET>
-```
-
-(`CRON_SECRET` is set in the server's `.env` — not written here, ask
-whoever has FTP/`.env` access for the current value.) Confirm the exact
-public URL/routing prefix matches how other `/api/...` routes resolve on
-this host.
+`cron/scheduleReminders.php` still exists as an optional manual-trigger
+endpoint (`?key=<CRON_SECRET>`, set in `.env`) — useful for testing, or if
+real Hostinger cron access becomes available later (point a cron job at it
+and it'll work standalone, no code change needed).
 
 ## 3. Attendance-summary reverse endpoint — retired, not migrated
 
