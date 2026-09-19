@@ -30,10 +30,10 @@ class _RecordingsPageState extends State<RecordingsPage> {
       final result = await ApiService.getMyRecordings();
       if (result['statusCode'] == 200 && result['success'] == true) {
         setState(() {
-          _recordings = (result['recordings'] as List).cast<Map<String, dynamic>>();
+          _recordings = (result['data'] as List).cast<Map<String, dynamic>>();
         });
       } else {
-        setState(() => _error = result['error']?.toString() ?? 'Failed to load recordings');
+        setState(() => _error = result['message']?.toString() ?? result['error']?.toString() ?? 'Failed to load recordings');
       }
     } catch (e) {
       setState(() => _error = 'Could not reach server: $e');

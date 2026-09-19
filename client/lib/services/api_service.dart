@@ -8,12 +8,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 // session survives an app restart too.
 class ApiService {
   static const String baseUrl = 'https://app.cscitedu.com';
-
-  // Class recordings (live-class capture) haven't been migrated to the new
-  // PHP backend yet — deliberately left pointed at the old Node backend and
-  // its existing S3-backed storage until that piece is rebuilt.
-  static const String _recordingsBaseUrl = 'https://13-62-125-222.sslip.io';
-
   static const String _cookieKey = 'session_cookie';
 
   static Future<String?> _getCookie() async {
@@ -108,7 +102,7 @@ class ApiService {
 
   static Future<Map<String, dynamic>> getMyRecordings() async {
     final response = await http.get(
-      Uri.parse('$_recordingsBaseUrl/api/videos/recordings'),
+      Uri.parse('$baseUrl/api/videos/recordings'),
       headers: await _headers(),
     );
     final data = jsonDecode(response.body) as Map<String, dynamic>;
