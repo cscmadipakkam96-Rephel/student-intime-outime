@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 
 class DashboardPage extends StatefulWidget {
-  const DashboardPage({super.key});
+  final String studentName;
+
+  const DashboardPage({super.key, required this.studentName});
 
   @override
   State<DashboardPage> createState() => _DashboardPageState();
@@ -161,6 +163,12 @@ class _DashboardPageState extends State<DashboardPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Text(
+                  'Welcome, ${widget.studentName}',
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 20),
+
                 // Live date + time card
                 Container(
                   width: double.infinity,

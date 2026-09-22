@@ -52,7 +52,7 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     final pages = [
-      const DashboardPage(),
+      DashboardPage(studentName: widget.studentName),
       const RecordingsPage(),
       const CourseVideosPage(),
       ProfilePage(
